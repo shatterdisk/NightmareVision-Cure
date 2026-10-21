@@ -596,9 +596,6 @@ class PlayState extends MusicBeatState
 		songStartCallback = startCountdown;
 		songEndCallback = endSong;
 		
-		// If u have kutty enabled
-		if (ClientPrefs.useEpicRankings) ratingsData.unshift(new Rating('epic'));
-		
 		// Gameplay settings
 		healthGain = ClientPrefs.getGameplaySetting('healthgain', 1);
 		healthLoss = ClientPrefs.getGameplaySetting('healthloss', 1);
@@ -729,7 +726,8 @@ class PlayState extends MusicBeatState
 			add(screenDim);
 		}
 		
-		playHUD = new funkin.game.huds.PsychHUD(this);
+		// default is doido now
+		playHUD = new funkin.game.huds.CureHUD(this);
 		add(playHUD);
 		playHUD.cameras = [camHUD];
 		
@@ -747,9 +745,10 @@ class PlayState extends MusicBeatState
 			prevCamFollow = null;
 		}
 		
-		FlxG.camera.follow(camFollow, LOCKON, 0);
+		FlxG.camera.focusOn(camFollow.getPosition());
+		// FlxG.camera.follow(camFollow, LOCKON, 0);
 		FlxG.camera.zoom = defaultCamZoom;
-		FlxG.camera.snapToTarget();
+		// FlxG.camera.snapToTarget();
 		
 		FlxG.worldBounds.set(0, 0, FlxG.width, FlxG.height);
 		
@@ -961,7 +960,7 @@ class PlayState extends MusicBeatState
 			});
 			
 			strums.showRatings = true;
-			strums.noteSplashes = (lane == 0);
+			strums.noteSplashes = true;
 			
 			final splashGrp = strums.splashLayer;
 			splashGrp.camera = camHUD;
@@ -1080,6 +1079,7 @@ class PlayState extends MusicBeatState
 		
 		final spr = new FlxSprite().loadGraphic(Paths.image(pref + path));
 		spr.scrollFactor.set();
+		spr.scale.set(0.7, 0.7);
 		spr.updateHitbox();
 		
 		spr.screenCenter();
@@ -1712,7 +1712,11 @@ class PlayState extends MusicBeatState
 	
 	override public function update(elapsed:Float):Void
 	{
-		if (cameraLerping && !inCutscene) FlxG.camera.followLerp = (.04 * cameraSpeed);
+		var followLerp:Float = cameraSpeed * elapsed;
+		if (followLerp > 1) followLerp = 1;
+		
+		CameraUtil.camPosLerp(camGame, camFollow, followLerp);
+		// if (cameraLerping && !inCutscene) FlxG.camera.followLerp = (.04 * cameraSpeed);
 		
 		if (generatedMusic && !endingSong && !isCameraOnForcedPos) moveCameraSection();
 		
@@ -2545,7 +2549,8 @@ class PlayState extends MusicBeatState
 	function snapCamToPos(x:Float = 0, y:Float = 0, lockPosition:Bool = false):Void
 	{
 		camFollow.setPosition(x, y);
-		FlxG.camera.snapToTarget();
+		CameraUtil.camPosLerp(FlxG.camera, camFollow, 1);
+		// FlxG.camera.snapToTarget();
 		if (lockPosition) isCameraOnForcedPos = true;
 	}
 	
@@ -3081,13 +3086,29 @@ class PlayState extends MusicBeatState
 	// e.g: PlayState.instance.updateRatingFC = function() { ... }
 	public dynamic function updateRatingFC()
 	{
-		// Rating FC
-		ratingFC = "";
-		if (epics > 0) ratingFC = "KFC"; // kentucky fried chiken
-		if (sicks > 0) ratingFC = "SFC";
-		if (goods > 0) ratingFC = "GFC";
-		if (bads > 0 || shits > 0) ratingFC = "FC";
-		if (songMisses > 0 && songMisses < 10) ratingFC = "SDCB";
-		else if (songMisses >= 10) ratingFC = "Clear";
+		var result:String = "F";
+		var acc = ratingPercent * 100;
+		function calc(daRank:String, maxAcc:Float, minAcc:Float)
+		{
+			if (acc > minAcc && acc <= maxAcc) result = daRank;
+		}
+		
+		// main ranks
+		calc("D", 65, 60);
+		calc("C", 75, 65);
+		calc("B", 80, 75);
+		calc("A", 95, 80);
+		calc("S", 100, 95);
+		
+		// pluses for your rank
+		if (songMisses == 0)
+		{
+			result += "+";
+			if (acc == 100.0) result = "P";
+		}
+		
+		// you cant give a result without notes :/
+		if (totalPlayed <= 0) result = "N/A";
+		ratingFC = result;
 	}
 }

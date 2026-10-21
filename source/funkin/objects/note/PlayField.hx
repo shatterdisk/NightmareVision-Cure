@@ -421,10 +421,10 @@ class PlayField extends FlxTypedContainer<StrumNote>
 			var ratingThing:funkin.game.Rating = funkin.game.Rating.judgeNote(note, Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / PlayState.instance?.playbackRate);
 			note.rating = ratingThing;
 			shouldSplash = field.noteSplashes && ratingThing.ratingMod >= 1;
-		} 
+		}
 		if(shouldSplash) field.spawnSplash(note);
 		
-		spawnSusSplash(note, field.playerControls);
+		spawnSusSplash(note, true);
 		
 		final globalScript = PlayState.instance.callNoteTypeScript(note.noteType, 'hit', scriptArgs);
 		

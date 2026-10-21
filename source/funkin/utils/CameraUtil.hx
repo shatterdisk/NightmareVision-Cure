@@ -31,4 +31,10 @@ class CameraUtil
 		
 		return cam;
 	}
+	
+	public static function camPosLerp(cam:flixel.FlxCamera, target:flixel.FlxObject, lerp:Float = 1)
+	{
+		cam.scroll.x = MathUtil.decayLerp(cam.scroll.x, target.x - FlxG.width / 2, 4, lerp);
+		cam.scroll.y = MathUtil.decayLerp(cam.scroll.y, target.y - FlxG.height / 2, 4, lerp);
+	}
 }
