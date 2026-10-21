@@ -7,6 +7,7 @@ import flixel.addons.transition.FlxTransitionableState;
 import flixel.util.FlxDestroyUtil;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.addons.ui.FlxUIState;
+import flixel.FlxState;
 import flixel.addons.transition.FlxTransitionSprite.TransitionStatus;
 
 import funkin.backend.BaseTransitionState;
@@ -92,7 +93,7 @@ class MusicBeatState extends FlxUIState
 		
 		if (!FlxTransitionableState.skipNextTransOut && transitionOutState != NONE)
 		{
-			openSubState(Type.createInstance(BaseTransitionState.getTransitionFromState(transitionOutState), [TransitionStatus.OUT]));
+			mostRecentSubState(this).openSubState(Type.createInstance(BaseTransitionState.getTransitionFromState(transitionOutState), [TransitionStatus.OUT]));
 		}
 		
 		FlxTransitionableState.skipNextTransOut = false;
@@ -225,13 +226,19 @@ class MusicBeatState extends FlxUIState
 		
 		if (!FlxTransitionableState.skipNextTransIn && transitionInState != NONE)
 		{
-			openSubState(Type.createInstance(BaseTransitionState.getTransitionFromState(transitionInState), [TransitionStatus.IN, onOutroComplete]));
+			mostRecentSubState(this).openSubState(Type.createInstance(BaseTransitionState.getTransitionFromState(transitionInState), [TransitionStatus.IN, onOutroComplete]));
 			return;
 		}
 		
 		FlxTransitionableState.skipNextTransIn = false;
 		
 		super.startOutro(onOutroComplete);
+	}
+	
+	function mostRecentSubState(state:FlxState):FlxState
+	{
+		if (state.subState != null) return mostRecentSubState(state.subState);
+		return state;
 	}
 	
 	override function destroy()

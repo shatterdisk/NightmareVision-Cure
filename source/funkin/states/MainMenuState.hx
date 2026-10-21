@@ -159,7 +159,7 @@ class MainMenuState extends MusicBeatState
 						switch (optionShit[curSelected])
 						{
 							case 'story_mode':
-								CoolUtil.switchState(StoryMenuState.new, NONE);
+								CoolUtil.switchState(StoryMenuState.new, SWIPE);
 							case 'freeplay':
 								CoolUtil.switchState(FreeplayState.new, SWIPE);
 							case 'credits':
