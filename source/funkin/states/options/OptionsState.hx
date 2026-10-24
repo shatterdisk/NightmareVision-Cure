@@ -13,13 +13,11 @@ class OptionsState extends MusicBeatState
 	public static var onPlayState:Bool = false;
 	
 	var options:Array<String> = [
-		'Notes',
-		'Controls',
-		'Adjust Delay and Combo',
-		'Graphics',
-		'Visuals and UI',
-		'Gameplay',
-		"Misc"
+        'Preferences',
+        'Gameplay',
+        'Graphics',
+        'Adjust Delay and Combo',
+        'Controls'
 	];
 	private var grpOptions:FlxTypedGroup<Alphabet>;
 	
@@ -32,18 +30,14 @@ class OptionsState extends MusicBeatState
 	{
 		switch (label)
 		{
-			case 'Notes':
-				openSubState(new funkin.states.options.NoteSettingsSubState());
+			case 'Preferences':
+				openSubState(new funkin.states.options.PreferencesSubState());
 			case 'Controls':
 				openSubState(new funkin.states.options.ControlsSubState());
 			case 'Graphics':
 				openSubState(new funkin.states.options.GraphicsSettingsSubState());
-			case 'Visuals and UI':
-				openSubState(new funkin.states.options.VisualsUISubState());
 			case 'Gameplay':
 				openSubState(new funkin.states.options.GameplaySettingsSubState());
-			case 'Misc':
-				openSubState(new funkin.states.options.MiscSubState());
 			case 'Mods':
 				openSubState(new funkin.states.options.ModOptionsSubState());
 			case 'Adjust Delay and Combo':
@@ -73,7 +67,7 @@ class OptionsState extends MusicBeatState
 		grpOptions = new FlxTypedGroup<Alphabet>();
 		add(grpOptions);
 		
-		if (funkin.data.ModOptions.list.length > 0) options.insert(options.indexOf('Misc'), 'Mods');
+		if (funkin.data.ModOptions.list.length > 0) options.insert(options.indexOf('Adjust Delay and Combo'), 'Mods');
 		
 		for (i in 0...options.length)
 		{

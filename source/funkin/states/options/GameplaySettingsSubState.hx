@@ -9,12 +9,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		title = 'Gameplay Settings';
 		rpcTitle = 'Gameplay Settings Menu'; // for Discord Rich Presence
 		
-		var option:Option = new Option('Mechanics', 'Check this if you want to enable mechanics!', 'mechanics', BOOL, true);
-		addOption(option);
-		
-		var option:Option = new Option('Modcharts', 'Check this if you want to enable modcharts!', 'modcharts', BOOL, true);
-		addOption(option);
-		
 		// I'd suggest using "Downscroll" as an example for making your own option since it is the simplest here
 		var option:Option = new Option('Downscroll', // Name
 			'If checked, notes go Down instead of Up, simple enough.', // Description
@@ -23,13 +17,24 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 			false); // Default value
 		addOption(option);
 		
-		// var option:Option = new Option('Middlescroll', '[IS NOT FUNCTIONAL AS OF NOW]\nIf checked, your notes get centered.', 'middleScroll', 'bool', false);
-		// addOption(option);
-		
 		var option:Option = new Option('Ghost Tapping', "If checked, you won't get misses from pressing keys\nwhile there are no notes able to be hit.", 'ghostTapping', BOOL, true);
 		addOption(option);
 		
+		var option:Option = new Option('Mechanics', 'Check this if you want to enable mechanics!', 'mechanics', BOOL, true);
+		addOption(option);
+		
+		var option:Option = new Option('Modcharts', 'Check this if you want to enable modcharts!', 'modcharts', BOOL, true);
+		addOption(option);
+		
+		var option:Option = new Option('Quants Enabled', // Name
+			'Colors notes in-game based on their step value. Helpful for timing your note hits.', 'quants', BOOL, false);
+		addOption(option);
+		
 		var option:Option = new Option('Disable Reset Button', "If checked, pressing Reset won't do anything.", 'noReset', BOOL, false);
+		addOption(option);
+		
+		var option:Option = new Option('Note Splashes:', "Change your preferred splash type when hitting/holding a note.", 'noteSplashType', STRING, 'Both',
+			['Both', 'Note Splashes', 'Hold Covers', 'Disabled']);
 		addOption(option);
 		
 		var option:Option = new Option('Hitsound Volume', 'Funny notes does \"Tick!\" when you hit them."', 'hitsoundVolume', PERCENT, 0);

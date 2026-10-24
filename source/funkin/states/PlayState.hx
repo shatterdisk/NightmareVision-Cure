@@ -952,8 +952,10 @@ class PlayState extends MusicBeatState
 			
 			if (lane == 1)
 			{
-				if (!ClientPrefs.opponentStrums) strums.baseAlpha = 0;
-				else if (ClientPrefs.middleScroll) strums.baseAlpha = 0.35;
+                // hide opponent
+				if (false) strums.baseAlpha = 0;
+                // middlescroll
+				else if (false) strums.baseAlpha = 0.35;
 			}
 		}
 		
@@ -2174,7 +2176,7 @@ class PlayState extends MusicBeatState
 				if (Math.isNaN(value) || value < 1) value = 1;
 				gfSpeed = value;
 			case 'Add Camera Zoom':
-				if (ClientPrefs.camZooms && FlxG.camera.zoom < 1.35)
+				if (FlxG.camera.zoom < 1.35)
 				{
 					var camZoom:Float = Std.parseFloat(value1);
 					var hudZoom:Float = Std.parseFloat(value2);
@@ -2452,15 +2454,12 @@ class PlayState extends MusicBeatState
 			camFollow.x += gf.cameraPosition[0] + girlfriendCameraOffset[0];
 			camFollow.y += gf.cameraPosition[1] + girlfriendCameraOffset[1];
 			
-			if (ClientPrefs.camFollowsCharacters)
-			{
-				final displacement = gf.getSingDisplacement();
-				
-				camFollow.x += displacement.x;
-				camFollow.y += displacement.y;
-				
-				displacement.putWeak();
-			}
+            final displacement = gf.getSingDisplacement();
+            
+            camFollow.x += displacement.x;
+            camFollow.y += displacement.y;
+            
+            displacement.putWeak();
 			
 			scripts.call('onMoveCamera', ['gf']);
 			scripts.set('whosTurn', 'gf');
@@ -2511,15 +2510,12 @@ class PlayState extends MusicBeatState
 		camFollow.x = desiredPos.x;
 		camFollow.y = desiredPos.y;
 		
-		if (ClientPrefs.camFollowsCharacters)
-		{
-			final displacement = curCharacter.getSingDisplacement();
-			
-			camFollow.x += displacement.x;
-			camFollow.y += displacement.y;
-			
-			displacement.putWeak();
-		}
+        final displacement = curCharacter.getSingDisplacement();
+        
+        camFollow.x += displacement.x;
+        camFollow.y += displacement.y;
+        
+        displacement.putWeak();
 		
 		desiredPos.put();
 		
@@ -2949,7 +2945,7 @@ class PlayState extends MusicBeatState
 		
 		if (beatsPerZoom == 0) beatsPerZoom = 4;
 		
-		if (camZooming && ClientPrefs.camZooms && curBeat % beatsPerZoom == 0)
+		if (camZooming && curBeat % beatsPerZoom == 0)
 		{
 			@:privateAccess if (!FlxTween.globalManager.containsTweensOf(FlxG.camera, ['zoom'])) // makes it so tweening the camera zoom won't glitch out when it bops every section
 				FlxG.camera.zoom += 0.015 * camZoomingMult;

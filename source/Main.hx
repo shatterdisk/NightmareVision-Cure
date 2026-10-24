@@ -51,11 +51,11 @@ class Main extends Sprite
 		
 		initHaxeUI();
 		
-		WindowUtil.resetWindow();
-		
 		// load save data before creating FlxGame
 		ClientPrefs.loadDefaultKeys();
 		ClientPrefs.tryBindingSave('funkin');
+		
+		WindowUtil.resetWindow();
 		
 		addChild(new funkin.backend.FunkinGame(startMeta.width, startMeta.height, Init, startMeta.fps, startMeta.fps, true, startMeta.startFullScreen));
 		

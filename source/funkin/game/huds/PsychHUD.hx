@@ -42,9 +42,9 @@ class PsychHUD extends BaseHUD
 	var comboTween:Bool = true;
 	
 	var textDivider = '•';
-	var showRating:Bool = ClientPrefs.showRatings;
-	var showRatingNum:Bool = ClientPrefs.showRatings;
-	var showCombo:Bool = ClientPrefs.showRatings;
+	var showRating:Bool = true;
+	var showRatingNum:Bool = true;
+	var showCombo:Bool = true;
 	var updateIconPos:Bool = true;
 	var updateIconScale:Bool = true;
 	var comboOffsets:Null<Array<Int>> = null; // So u can overwrite the users combo offset if needed without messing with clientprefs
@@ -63,32 +63,26 @@ class PsychHUD extends BaseHUD
 		healthBar.screenCenter(X);
 		healthBar.leftToRight = false;
 		healthBar.scrollFactor.set();
-		healthBar.visible = !ClientPrefs.hideHud;
-		healthBar.alphaMultipler = ClientPrefs.healthBarAlpha;
+		healthBar.alphaMultipler = 1;
 		
 		reloadHealthBarColors();
 		add(healthBar);
 		
 		iconP1 = new HealthIcon(parent.boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - 75;
-		iconP1.visible = !ClientPrefs.hideHud;
-		iconP1.alphaMultipler = ClientPrefs.healthBarAlpha;
 		add(iconP1);
 		
 		iconP2 = new HealthIcon(parent.dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
-		iconP2.visible = !ClientPrefs.hideHud;
-		iconP2.alphaMultipler = ClientPrefs.healthBarAlpha;
 		add(iconP2);
 		
 		scoreTxt = new FlxText(0, healthBar.y + 40, FlxG.width, "", 20);
 		scoreTxt.setFormat(Paths.DEFAULT_FONT, 20, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		scoreTxt.scrollFactor.set();
 		scoreTxt.borderSize = 1.25;
-		scoreTxt.visible = !ClientPrefs.hideHud;
 		add(scoreTxt);
 		
-		var showTime:Bool = (ClientPrefs.timeBarType != 'Disabled');
+		var showTime:Bool = true;
 		timeTxt = new FlxText(0, 19, FlxG.width, "", 32);
 		timeTxt.setFormat(Paths.DEFAULT_FONT, 32, FlxColor.WHITE, CENTER, FlxTextBorderStyle.OUTLINE, FlxColor.BLACK);
 		timeTxt.scrollFactor.set();
@@ -96,7 +90,6 @@ class PsychHUD extends BaseHUD
 		timeTxt.borderSize = 2;
 		timeTxt.visible = parent.updateTime = showTime;
 		if (ClientPrefs.downScroll) timeTxt.y = FlxG.height - 44;
-		if (ClientPrefs.timeBarType == 'Song Name') timeTxt.text = PlayState.SONG.song;
 		
 		final timeGraphic = FunkinAssets.exists(Paths.mods('images/${Paths.UI_PREFIX}timeBar')) ? '${Paths.UI_PREFIX}timeBar' : 'UI/timeBar';
 		
@@ -191,8 +184,6 @@ class PsychHUD extends BaseHUD
 	
 	public function doScoreBop():Void
 	{
-		if (!ClientPrefs.scoreZoom) return;
-		
 		scoreTextTwn?.cancel();
 		scoreTxt.scale.set(1.075, 1.075);
 		scoreTextTwn = FlxTween.tween(scoreTxt.scale, {x: 1, y: 1}, 0.2);
@@ -269,12 +260,10 @@ class PsychHUD extends BaseHUD
 			parent.songPercent = (curTime / parent.songLength);
 			
 			var songCalc:Float = (parent.songLength - curTime);
-			if (ClientPrefs.timeBarType == 'Time Elapsed') songCalc = curTime;
 			
 			var secondsTotal:Int = Math.floor(songCalc / 1000);
 			if (secondsTotal < 0) secondsTotal = 0;
-			
-			if (ClientPrefs.timeBarType != 'Song Name') timeTxt.text = flixel.util.FlxStringUtil.formatTime(secondsTotal, false);
+			timeTxt.text = flixel.util.FlxStringUtil.formatTime(secondsTotal, false);
 		}
 	}
 	
@@ -307,8 +296,6 @@ class PsychHUD extends BaseHUD
 		final ratingImage = daRating.name;
 		
 		final posX = FlxG.width * 0.35;
-		
-		if (ClientPrefs.hideHud) return;
 		
 		parent.scripts.call('onPopUpScore', [note, daRating, ratingGraphic, ratingNumGroup]);
 		

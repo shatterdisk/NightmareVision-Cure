@@ -49,14 +49,10 @@ class CureHUD extends BaseHUD
 		
 		iconP1 = new HealthIcon(parent.boyfriend.healthIcon, true);
 		iconP1.y = healthBar.y - 75;
-		iconP1.visible = !ClientPrefs.hideHud;
-		iconP1.alphaMultipler = ClientPrefs.healthBarAlpha;
 		add(iconP1);
 		
 		iconP2 = new HealthIcon(parent.dad.healthIcon, false);
 		iconP2.y = healthBar.y - 75;
-		iconP2.visible = !ClientPrefs.hideHud;
-		iconP2.alphaMultipler = ClientPrefs.healthBarAlpha;
 		add(iconP2);
 		
 		scoreTxt = new FlxText(0, healthBar.y + healthBar.bg.height + 12, FlxG.width, "", 20);
@@ -227,8 +223,6 @@ class CureHUD extends BaseHUD
 	{
 		final ratingName = daRating.name;
 		final posX = FlxG.width * 0.35;
-		
-		if (ClientPrefs.hideHud) return;
 		
 		parent.scripts.call('onPopUpScore', [note, daRating, ratingGraphic, ratingNumGroup]);
 		

@@ -297,12 +297,13 @@ class WindowUtil
 		
 		if (window == null) return;
 		
-		#if mac
-		final dpiScale = 1.0;
-		#else
-		final dpi = lime.system.System.getDisplay(0)?.dpi ?? 96;
-		final dpiScale = dpi / 96;
+        var dpiScale = 1.0;
+		#if !mac
+		var dpi = lime.system.System.getDisplay(0)?.dpi ?? 96;
+		dpiScale = dpi / 96;
 		#end
+
+        dpiScale *= Std.parseFloat(ClientPrefs.windowSize.replace("x", ""));
 		
 		@:privateAccess
 		{

@@ -59,24 +59,12 @@ class ClientPrefs
 	
 	@saveVar public static var vsyncMode:VsyncMode = OFF;
 	
+	@saveVar public static var windowSize:String = "1x";
+	
 	// visuals ------------------------------------------------------------------------//
 	@saveVar public static var noteSplashType:String = 'Both';
 	
-	@saveVar public static var hideHud:Bool = false;
-	
-	@saveVar public static var showRatings:Bool = true;
-	
-	@saveVar public static var timeBarType:String = 'Time Left';
-	
 	@saveVar public static var flashing:Bool = true;
-	
-	@saveVar public static var camZooms:Bool = true;
-	
-	@saveVar public static var scoreZoom:Bool = true;
-	
-	@saveVar public static var healthBarAlpha:Float = 1;
-	
-	@saveVar public static var camFollowsCharacters:Bool = true;
 	
 	@saveVar public static var underlayType:String = 'Lane Underlay';
 	
@@ -89,17 +77,11 @@ class ClientPrefs
 	
 	@saveVar public static var downScroll:Bool = false;
 	
-	@saveVar public static var middleScroll:Bool = false;
-	
-	@saveVar public static var opponentStrums:Bool = true;
-	
 	@saveVar public static var ghostTapping:Bool = true;
 	
 	@saveVar public static var noReset:Bool = false;
 	
 	@saveVar public static var hitsoundVolume:Float = 0;
-	
-	@saveVar public static var toggleSplashScreen:Bool = true;
 	
 	@saveVar public static var noteOffset:Int = 0;
 	
@@ -367,6 +349,7 @@ class ClientPrefs
 		changeFps(framerate);
 		
 		refreshVSyncMode();
+		funkin.utils.WindowUtil.resetWindow();
 		
 		var save:FlxSave = new FlxSave();
 		save.bind('controls_v2');
