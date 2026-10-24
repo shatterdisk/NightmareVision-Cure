@@ -1,6 +1,6 @@
 package funkin.objects.note;
 
-import funkin.game.Rating;
+import funkin.game.Timings.Rating;
 import funkin.backend.math.Vector3;
 
 import flixel.FlxSprite;

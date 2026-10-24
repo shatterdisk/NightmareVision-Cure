@@ -21,14 +21,13 @@ import flixel.util.FlxStringUtil;
 
 import funkin.objects.Character;
 import funkin.backend.Difficulty;
-import funkin.game.RatingInfo;
 import funkin.objects.note.*;
 import funkin.objects.note.Note;
-import funkin.game.huds.BaseHUD;
+import funkin.game.huds.*;
 import funkin.scripts.*;
 import funkin.data.Song;
 import funkin.data.StageData;
-import funkin.game.Rating;
+import funkin.game.Timings;
 import funkin.objects.*;
 import funkin.data.*;
 import funkin.states.*;
@@ -58,20 +57,6 @@ class PlayState extends MusicBeatState
 	 * Static reference to the state. used for other classes to reference
 	 */
 	public static var instance:Null<PlayState> = null;
-	
-	public static var ratingStuff:Array<RatingInfo> = [
-		new RatingInfo('You Suck!', 0.2),
-		new RatingInfo('Shit', 0.4),
-		new RatingInfo('Bad', 0.5),
-		new RatingInfo('Bruh', 0.6),
-		new RatingInfo('Meh', 0.69),
-		new RatingInfo('Nice', 0.7),
-		new RatingInfo('Good', 0.8),
-		new RatingInfo('Great', 0.9),
-		new RatingInfo('Great', 0.9),
-		new RatingInfo('Sick!', 1),
-		new RatingInfo('Perfect!!', 1),
-	];
 	
 	/**
 	 * Helper function to ready PlayState for conveniently.
@@ -128,7 +113,7 @@ class PlayState extends MusicBeatState
 		if (generatedMusic) audio.pitch = playbackRate;
 		
 		FlxG.animationTimeScale = value;
-		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000 * value;
+		Conductor.safeZoneOffset = (Conductor.safeFrames / 60) * 1000 * value;
 		
 		playbackRate = value;
 		#else
@@ -345,14 +330,6 @@ class PlayState extends MusicBeatState
 	var songPercent:Float = 0;
 	
 	public var combo:Int = 0;
-	public var ratingsData:Array<Rating> = [
-		new Rating('sick'),
-		new Rating('good'),
-		new Rating('bad'),
-		new Rating('shit')
-	];
-	
-	public var epics:Int = 0;
 	public var sicks:Int = 0;
 	public var goods:Int = 0;
 	public var bads:Int = 0;
@@ -494,6 +471,7 @@ class PlayState extends MusicBeatState
 	public var camCurTarget:Null<Character> = null;
 	
 	public var playHUD:Null<BaseHUD> = null;
+	public var hudName:String = "cure";
 	
 	public var countdownPrefix:String = Paths.COUNTDOWN_PREFIX;
 	
@@ -726,8 +704,13 @@ class PlayState extends MusicBeatState
 			add(screenDim);
 		}
 		
-		// default is doido now
-		playHUD = new funkin.game.huds.CureHUD(this);
+		playHUD = switch (hudName)
+		{
+			case "psych":
+				new PsychHUD(this);
+			default:
+				new CureHUD(this);
+		}
 		add(playHUD);
 		playHUD.cameras = [camHUD];
 		
@@ -784,6 +767,7 @@ class PlayState extends MusicBeatState
 		FlxG.watch.addFunction('curStep: ', () -> curStep);
 		#end
 		
+		health = 1;
 		moveCameraSection();
 		
 		noteTypeMap?.clear();
@@ -819,7 +803,7 @@ class PlayState extends MusicBeatState
 		input.addEventListener(InputEvent.INPUT_PRESSED, onInputPress);
 		input.addEventListener(InputEvent.INPUT_RELEASED, onInputRelease);
 		
-		Conductor.safeZoneOffset = (ClientPrefs.safeFrames / 60) * 1000;
+		Conductor.safeZoneOffset = (Conductor.safeFrames / 60) * 1000;
 		
 		scripts.call('onCreatePost', []);
 		
@@ -2701,16 +2685,16 @@ class PlayState extends MusicBeatState
 	{
 		if (note.hitCausesMiss || note.canMiss) return;
 		
-		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset);
+		var noteDiff:Float = Math.abs(note.strumTime - Conductor.songPosition);
 		
 		audio.playerVolume = 1 * volumeMult;
 		
 		// tryna do MS based judgment due to popular demand
-		var daRating:Rating = Rating.judgeNote(note, noteDiff / playbackRate);
+		var daRating:Rating = Timings.judgeNote(note, noteDiff / playbackRate);
 		var judgeScore:Int = daRating.score;
 		
 		totalNotesHit += daRating.ratingMod;
-		if (!note.ratingDisabled) daRating.increase();
+		if (!note.ratingDisabled) Timings.increase(daRating, 1);
 		
 		var field:PlayField = note.playField;
 		
@@ -3060,20 +3044,6 @@ class PlayState extends MusicBeatState
 			{
 				// Rating Percent
 				ratingPercent = Math.min(1, Math.max(0, totalNotesHit / totalPlayed));
-				
-				// Rating Name
-				if (ratingPercent >= 1) ratingName = ratingStuff[ratingStuff.length - 1].name; // Uses last string
-				else
-				{
-					for (i in 0...ratingStuff.length - 1)
-					{
-						if (ratingPercent < ratingStuff[i].percent)
-						{
-							ratingName = ratingStuff[i].name;
-							break;
-						}
-					}
-				}
 			}
 			
 			updateRatingFC();

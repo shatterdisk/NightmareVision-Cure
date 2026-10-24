@@ -8,6 +8,8 @@ class BaseHUD extends FlxTypedContainer<FlxBasic>
 {
 	// keep this in caps for consistency
 	public var name:String = 'BASE';
+	public var healthLerp:Float = 0;
+	public var healthTarget:Float = 0;
 	
 	public var parent:PlayState;
 	
@@ -43,13 +45,22 @@ class BaseHUD extends FlxTypedContainer<FlxBasic>
 	
 	public function onUpdateScore(score:Int = 0, accuracy:Float = 0, misses:Int = 0, missed:Bool = false):Void {}
 	
-	public function popUpScore(daRating:funkin.game.Rating, combo:Int, note:funkin.objects.note.Note):Void {}
+	public function popUpScore(daRating:funkin.game.Timings.Rating, combo:Int, note:funkin.objects.note.Note):Void {}
 	
 	public function onEvent(ev:String, v1:String, v2:String, strumTime:Float):Void {}
 	
 	public function onCharacterChange() {}
 	
-	public function onHealthChange(health:Float) {}
+	public function onHealthChange(health:Float)
+	{
+		final newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(health, parent.healthBounds.min, parent.healthBounds.max), parent.healthBounds.min, parent.healthBounds.max, 0, 100);
+		healthTarget = (newPercent != null ? newPercent : 0);
+	}
+	
+	public function updateHealthPercent(elapsed:Float)
+	{
+		healthLerp = MathUtil.decayLerp(healthLerp, healthTarget, 8, elapsed);
+	}
 	
 	public function cachePopUpScore() {}
 	
@@ -64,4 +75,10 @@ class BaseHUD extends FlxTypedContainer<FlxBasic>
 		}
 		return alpha = v;
 	}
+
+    override function update(elapsed:Float)
+	{
+		super.update(elapsed);
+        updateHealthPercent(elapsed);
+    }
 }

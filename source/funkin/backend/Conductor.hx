@@ -32,8 +32,8 @@ class Conductor
 	
 	public inline static function secsToRow(sex:Float):Int return Math.round(getBeat(sex) * ROWS_PER_BEAT);
 	
-	// public static var safeFrames:Int = 10;
-	public static var safeZoneOffset:Float = (ClientPrefs.safeFrames / 60) * 1000; // is calculated in create(), is safeFrames in milliseconds
+	public static var safeFrames:Int = 10;
+	public static var safeZoneOffset:Float = (safeFrames / 60) * 1000; // is calculated in create(), is safeFrames in milliseconds
 	
 	public static var bpmChangeMap:Array<BPMChangeEvent> = [];
 	

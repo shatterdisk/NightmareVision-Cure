@@ -296,15 +296,15 @@ class PsychHUD extends BaseHUD
 		iconP2.changeIcon(parent.dad.healthIcon);
 	}
 	
-	override function onHealthChange(health:Float)
+	override function updateHealthPercent(elapsed:Float)
 	{
-		final newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
-		healthBar.percent = (newPercent != null ? newPercent : 0);
+		super.updateHealthPercent(elapsed);
+		healthBar.percent = healthLerp;
 	}
 	
-	override function popUpScore(daRating:funkin.game.Rating, combo:Int, note:funkin.objects.note.Note)
+	override function popUpScore(daRating:funkin.game.Timings.Rating, combo:Int, note:funkin.objects.note.Note)
 	{
-		final ratingImage = daRating.image;
+		final ratingImage = daRating.name;
 		
 		final posX = FlxG.width * 0.35;
 		
@@ -385,8 +385,7 @@ class PsychHUD extends BaseHUD
 	
 	override function cachePopUpScore()
 	{
-		var ratings = ["sick", "good", "bad", "shit"];
-		if (ClientPrefs.useEpicRankings) ratings.push('epic');
+		var ratings = Timings.ratings;
 		
 		for (rating in ratings)
 		{

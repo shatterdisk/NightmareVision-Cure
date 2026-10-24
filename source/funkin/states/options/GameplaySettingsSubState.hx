@@ -41,35 +41,6 @@ class GameplaySettingsSubState extends BaseOptionsMenu
 		option.decimals = 1;
 		option.onChange = onChangeHitsoundVolume;
 		
-		var option:Option = new Option('Rating Offset', 'Changes how late/early you have to hit for a "Sick!"\nHigher values mean you have to hit later.', 'ratingOffset', INT, 0);
-		option.displayFormat = '%vms';
-		option.scrollSpeed = 20;
-		option.minValue = -30;
-		option.maxValue = 30;
-		addOption(option);
-		
-		var option:Option = new Option('Use Epic Ratings', // Name
-			'If checked, adds Epic Ratings as a bonus judgement above sick (does not affect accuracy, only your score).', // Description
-			'useEpicRankings', // Save data variable name
-			BOOL, // Variable type
-			true); // Default value
-		addOption(option);
-		
-		// Display Name, Variable (in ClientPrefs), Minimum Valeu, Maximum Value, Scroll Speed (when holding down Left/Right)
-		addHitWindowOption("Epic!", "epicWindow", 15.0, 22.5, 15);
-		addHitWindowOption("Sick!", "sickWindow", 15.0, 45.0, 30);
-		addHitWindowOption("Good", "goodWindow", 15.0, 90.0, 60);
-		addHitWindowOption("Bad", "badWindow", 15.0, 135.0, 90);
-		
-		// this is usually 166.67 - AKA: Shit Window
-		// i won't change this to be an actual Shit window because it'd break too much to be worth it
-		var option:Option = new Option('Safe Frames', 'Changes how many frames you have for\nhitting a note earlier or late.', 'safeFrames', FLOAT, 10);
-		option.scrollSpeed = 5;
-		option.minValue = 2.0;
-		option.maxValue = 10.0;
-		option.changeValue = 0.1;
-		addOption(option);
-		
 		super();
 	}
 	

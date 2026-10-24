@@ -418,11 +418,12 @@ class PlayField extends FlxTypedContainer<StrumNote>
 		var shouldSplash = field.noteSplashes;
 		if (field.playerControls)
 		{
-			var ratingThing:funkin.game.Rating = funkin.game.Rating.judgeNote(note, Math.abs(note.strumTime - Conductor.songPosition + ClientPrefs.ratingOffset) / PlayState.instance?.playbackRate);
+			var ratingThing:funkin.game.Timings.Rating = funkin.game.Timings.judgeNote(note,
+				Math.abs(note.strumTime - Conductor.songPosition) / PlayState.instance?.playbackRate);
 			note.rating = ratingThing;
 			shouldSplash = field.noteSplashes && ratingThing.ratingMod >= 1;
 		}
-		if(shouldSplash) field.spawnSplash(note);
+		if (shouldSplash) field.spawnSplash(note);
 		
 		spawnSusSplash(note, true);
 		
@@ -468,7 +469,8 @@ class PlayField extends FlxTypedContainer<StrumNote>
 		if (!note.hitCausesMiss && !note.canMiss)
 		{
 			final tail = (note.isSustainNote ? note.parent.tail : note.tail);
-			for (sustain in tail) sustain.tooLate = true;
+			for (sustain in tail)
+				sustain.tooLate = true;
 		}
 		
 		// if the sustain splash exists, KILL KIL KILL IT KILL KI L KLLK LSKD:LKLK
@@ -585,7 +587,7 @@ class PlayField extends FlxTypedContainer<StrumNote>
 	public function spawnSusSplash(note:Note, isPlayer:Bool = false):SustainSplash
 	{
 		if ((ClientPrefs.noteSplashType == "Both" || ClientPrefs.noteSplashType == "Hold Covers")
-			&& _skin?.sustainSplashes 
+			&& _skin?.sustainSplashes
 			&& note.tail.length > 0)
 		{
 			final strum:Null<StrumNote> = note.playField.members[note.noteData];

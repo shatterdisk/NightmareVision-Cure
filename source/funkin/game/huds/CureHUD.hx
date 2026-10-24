@@ -8,6 +8,7 @@ import flixel.text.FlxText.FlxTextFormat;
 
 import funkin.objects.Bar;
 import funkin.objects.HealthIcon;
+import funkin.objects.RatingSprite;
 
 @:access(funkin.states.PlayState)
 class CureHUD extends BaseHUD
@@ -71,7 +72,7 @@ class CureHUD extends BaseHUD
 		add(timeTxt);
 		
 		var ratingPos = ClientPrefs.downScroll ? FlxG.height - 150 : 65;
-		ratingGraphic = new RatingSprite('${ratingPrefix}ratings${ratingSuffix}', ["sick", "good", "bad", "shit"]);
+		ratingGraphic = new RatingSprite('${ratingPrefix}ratings${ratingSuffix}');
 		ratingGraphic.alpha = 0;
 		ratingGraphic.screenCenter(X);
 		ratingGraphic.y = ratingPos - 15;
@@ -141,11 +142,11 @@ class CureHUD extends BaseHUD
 	
 	public function updateIconsScale(elapsed:Float)
 	{
-		final mult:Float = MathUtil.decayLerp(iconP1.scale.x, 1, 9, elapsed);
+		final mult:Float = MathUtil.decayLerp(iconP1.scale.x, 1, 8, elapsed);
 		iconP1.scale.set(mult, mult);
 		iconP1.updateHitbox();
 		
-		final mult:Float = MathUtil.decayLerp(iconP2.scale.x, 1, 9, elapsed);
+		final mult:Float = MathUtil.decayLerp(iconP2.scale.x, 1, 8, elapsed);
 		iconP2.scale.set(mult, mult);
 		iconP2.updateHitbox();
 	}
@@ -177,12 +178,18 @@ class CureHUD extends BaseHUD
 		iconP2.flipX = !iconP2.flipX;
 	}
 	
+	override function updateHealthPercent(elapsed:Float)
+	{
+		super.updateHealthPercent(elapsed);
+		healthBar.percent = healthLerp;
+	}
+	
 	override function update(elapsed:Float)
 	{
 		super.update(elapsed);
 		
-		updateIconsPosition();
 		updateIconsScale(elapsed);
+		updateIconsPosition();
 		updateIconsAnimation();
 		
 		if (!parent.startingSong && !parent.paused && parent.updateTime && !parent.endingSong)
@@ -216,23 +223,16 @@ class CureHUD extends BaseHUD
 		iconP2.changeIcon(parent.dad.healthIcon);
 	}
 	
-	override function onHealthChange(health:Float)
+	override function popUpScore(daRating:funkin.game.Timings.Rating, combo:Int, note:funkin.objects.note.Note)
 	{
-		final newPercent:Null<Float> = FlxMath.remapToRange(FlxMath.bound(healthBar.valueFunction(), healthBar.bounds.min, healthBar.bounds.max), healthBar.bounds.min, healthBar.bounds.max, 0, 100);
-		healthBar.percent = (newPercent != null ? newPercent : 0);
-	}
-	
-	override function popUpScore(daRating:funkin.game.Rating, combo:Int, note:funkin.objects.note.Note)
-	{
-		final ratingImage = daRating.image;
-		
+		final ratingName = daRating.name;
 		final posX = FlxG.width * 0.35;
 		
 		if (ClientPrefs.hideHud) return;
 		
 		parent.scripts.call('onPopUpScore', [note, daRating, ratingGraphic, ratingNumGroup]);
 		
-		ratingGraphic.playRating(daRating.image);
+		ratingGraphic.playRating(ratingName);
 		var comboStr:String = '${Math.abs(combo)}'.lpad("0", 3);
 		var stringArr = comboStr.split("");
 		ratingNumGroup.forEachAlive((num) -> {
@@ -240,83 +240,5 @@ class CureHUD extends BaseHUD
 		});
 		
 		parent.scripts.call('onPopUpScorePost', [note, daRating, ratingGraphic, ratingNumGroup]);
-	}
-}
-
-class RatingSprite extends FlxSprite
-{
-	// fit between notes
-	public var baseScale:Float = 0.49;
-	public var ratingTween:FlxTween;
-	
-	public function new(assetPath:String, ratingArray:Array<String>)
-	{
-		super();
-		var ratingGraph = Paths.image(assetPath);
-		loadGraphic(ratingGraph, true, Math.floor(ratingGraph.width), Math.floor(ratingGraph.height / 4));
-		for (i in 0...ratingArray.length)
-			animation.add(ratingArray[i], [i], 0, false);
-			
-		scale.x = baseScale;
-		scale.y = baseScale;
-		updateHitbox();
-		alpha = 0;
-	}
-	
-	public function playRating(rating:String)
-	{
-		animation.play(rating);
-		scale.set(baseScale * 1.2, baseScale * 1.2);
-		alpha = 1;
-		stopTween();
-		ratingTween = FlxTween.tween(this, {alpha: 0}, 0.5, {startDelay: 0.7});
-	}
-	
-	public function stopTween()
-	{
-		if (ratingTween != null) ratingTween.cancel();
-	}
-	
-	override function update(elapsed:Float)
-	{
-		super.update(elapsed);
-		scale.x = MathUtil.decayLerp(scale.x, baseScale, 9, elapsed);
-		scale.y = MathUtil.decayLerp(scale.x, baseScale, 9, elapsed);
-	}
-}
-
-class ComboSprite extends FlxSprite
-{
-	// fit between notes
-	public var baseScale:Float = 0.34;
-	public var comboTween:FlxTween;
-	public var lastNum:String = "";
-	
-	public function new(assetPath:String)
-	{
-		super();
-		var numberGraph = Paths.image(assetPath);
-		loadGraphic(numberGraph, true, Math.floor(numberGraph.width / 11), Math.floor(numberGraph.height));
-		for (i in 0...11)
-			animation.add((i <= 9 ? '$i' : "-"), [i], 0, false);
-			
-		scale.x = baseScale;
-		scale.y = baseScale;
-		updateHitbox();
-		alpha = 0;
-	}
-	
-	public function playCombo(num:String)
-	{
-		animation.play(num);
-		alpha = 1;
-		stopTween();
-		comboTween = FlxTween.tween(this, {alpha: 0}, 0.5, {startDelay: 0.7});
-		lastNum = num;
-	}
-	
-	public function stopTween()
-	{
-		if (comboTween != null) comboTween.cancel();
 	}
 }

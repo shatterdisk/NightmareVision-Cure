@@ -99,21 +99,7 @@ class ClientPrefs
 	
 	@saveVar public static var hitsoundVolume:Float = 0;
 	
-	@saveVar public static var ratingOffset:Int = 0;
-	
-	@saveVar public static var useEpicRankings:Bool = true;
-	
 	@saveVar public static var toggleSplashScreen:Bool = true;
-	
-	@saveVar public static var epicWindow:Float = 22.5;
-	
-	@saveVar public static var sickWindow:Float = 45.0;
-	
-	@saveVar public static var goodWindow:Float = 90.0;
-	
-	@saveVar public static var badWindow:Float = 135.0;
-	
-	@saveVar public static var safeFrames:Float = 10.0;
 	
 	@saveVar public static var noteOffset:Int = 0;
 	
