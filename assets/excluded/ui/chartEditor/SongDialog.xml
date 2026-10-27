@@ -7,6 +7,24 @@
 				<textfield width="100%" id="songNameField" horizontalAlign="right" text="Bopeebo"/>
 			</grid>
 			
+			<spacer height="1"/>
+			<rule/>
+			<spacer height="1"/>
+			
+			<hbox width="100%" style="spacing: 10px;">
+				<button text="Save" id="saveSong" width="100%"/>
+				<button text="Save Events" id="saveEvents" width="100%"/>
+				<button text="Reload Audio" id="reloadAudio" width="100%"/>
+			</hbox>
+
+			<spacer/>
+
+			<hbox width="100%" style="spacing: 10px;">
+				<button text="Load Chart" id="reloadJson" width="100%"/>
+				<button text="Load Events" id="loadEvents" width="100%"/>
+				<button text="Autosaves" id="autosaves" width="100%"/>
+			</hbox>
+			
 			<spacer height="5"/>
 			<rule/>
 			<spacer height="5"/>
@@ -285,6 +303,12 @@
 						
 						<label text="Value 2:" width="55" verticalAlign="center"/>
 						<textfield width="100%" id="value2Field" horizontalAlign="right" text=""/>
+
+                        <label text="Value 3:" width="55" verticalAlign="center"/>
+						<textfield width="100%" id="value3Field" horizontalAlign="right" text=""/>
+
+                        <label text="Value 4:" width="55" verticalAlign="center"/>
+						<textfield width="100%" id="value4Field" horizontalAlign="right" text=""/>
 					</grid>
 				</box>
 				

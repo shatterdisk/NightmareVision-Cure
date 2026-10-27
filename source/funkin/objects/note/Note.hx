@@ -19,8 +19,7 @@ typedef EventNote =
 {
 	strumTime:Float,
 	event:String,
-	value1:String,
-	value2:String
+	values:Array<String>
 }
 
 abstract QueueNote(Array<Dynamic>) to Array<Dynamic>

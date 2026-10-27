@@ -22,7 +22,7 @@ class MasterEditorMenu extends MusicBeatState
 		'Mods Manager',
 		'Week Editor',
 		'Menu Character Editor',
-		'New Chart Editor (Unfinished)',
+		'Old Chart Editor'
 	];
 	private var grpTexts:FlxTypedGroup<Alphabet>;
 	private var directories:Array<String> = [null];
@@ -132,13 +132,15 @@ class MasterEditorMenu extends MusicBeatState
 				case 'Menu Character Editor':
 					FlxG.switchState(() -> new MenuCharacterEditorState());
 				case 'Chart Editor': // felt it would be cool maybe
-					FlxG.switchState(OLDChartEditorState.new);
+					FlxG.switchState(ChartEditorState.new);
 				// case 'Note Skin Editor':
 				// 	FlxG.switchState(() -> new NoteSkinEditor('default'));
 				case 'Chart Converter':
 					FlxG.switchState(() -> new ChartConverterState());
-				case "New Chart Editor (Unfinished)":
-					FlxG.switchState(ChartEditorState.new);
+				case "Old Chart Editor":
+                    FlxG.switchState(OLDChartEditorState.new);
+					
+
 			}
 			if (muteMusic)
 			{

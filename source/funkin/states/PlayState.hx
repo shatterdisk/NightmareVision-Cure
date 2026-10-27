@@ -1175,21 +1175,21 @@ class PlayState extends MusicBeatState
 		
 		var file:String = Paths.json('$songName/charts/events');
 		
-		inline function makeEv(time:Float, ev:String, v1:String, v2:String)
+		inline function makeEv(time:Float, ev:String, v:Array<String>)
 		{
 			final ev:EventNote =
 				{
 					strumTime: time + ClientPrefs.noteOffset,
 					event: ev,
-					value1: v1,
-					value2: v2
+                    values: v
 				};
 				
 			var isCopy:Bool = false;
 			
 			for (event in events)
 			{
-				if (FlxMath.equal(event.strumTime, ev.strumTime) && event.event == ev.event && event.value1 == ev.value1 && event.value2 == ev.value2)
+                // NOTE: fix
+				if (FlxMath.equal(event.strumTime, ev.strumTime) && event.event == ev.event && event.values == ev.values)
 				{
 					isCopy = true;
 					
@@ -1208,7 +1208,7 @@ class PlayState extends MusicBeatState
 			{
 				for (i in 0...event[1].length)
 				{
-					makeEv(event[0], event[1][i][0], event[1][i][1], event[1][i][2]);
+					makeEv(event[0], event[1][i][0], event[1][i].slice(1));
 				}
 			}
 		}
@@ -1216,7 +1216,7 @@ class PlayState extends MusicBeatState
 		for (event in SONG.events) // Event Notes
 		{
 			for (i in 0...event[1].length)
-				makeEv(event[0], event[1][i][0], event[1][i][1], event[1][i][2]);
+				makeEv(event[0], event[1][i][0], event[1][i].slice(1));
 		}
 		
 		return (_parsedEvents = events);
@@ -1378,8 +1378,7 @@ class PlayState extends MusicBeatState
 						{
 							strumTime: daStrumTime + ClientPrefs.noteOffset,
 							event: songNotes[2],
-							value1: songNotes[3],
-							value2: songNotes[4]
+                            values: [songNotes[3], songNotes[4]]
 						});
 						
 					continue;
@@ -1440,6 +1439,7 @@ class PlayState extends MusicBeatState
 		}
 		
 		eventNotes.sort(function(a:EventNote, b:EventNote) return (a.strumTime > b.strumTime ? 1 : -1));
+        trace(eventNotes);
 		queueNotes.sort(function(a:QueueNote, b:QueueNote) return (a.strumTime > b.strumTime ? 1 : -1));
 		
 		speedChanges.sort(SortUtil.svSort);
@@ -1478,18 +1478,22 @@ class PlayState extends MusicBeatState
 	
 	function eventPushed(event:EventNote):Void
 	{
+        // temp
+        final value1 = event.values[0] ?? '';
+        final value2 = event.values[1] ?? '';
+
 		switch (event.event)
 		{
 			case 'Mult SV' | 'Constant SV':
 				var speed:Float = 1;
 				if (event.event == 'Constant SV')
 				{
-					var b = Std.parseFloat(event.value1);
+					var b = Std.parseFloat(value1);
 					speed = Math.isNaN(b) ? songSpeed : (songSpeed / b);
 				}
 				else
 				{
-					speed = Std.parseFloat(event.value1);
+					speed = Std.parseFloat(value1);
 					if (Math.isNaN(speed)) speed = 1;
 				}
 				
@@ -1503,16 +1507,16 @@ class PlayState extends MusicBeatState
 					});
 			case 'Change Noteskin':
 				var fieldID:Int = 0;
-				switch (event.value2.toLowerCase())
+				switch (value2.toLowerCase())
 				{
 					case 'dad' | 'opponent' | '1':
 						fieldID = 1;
 					default:
-						fieldID = Std.parseInt(event.value1);
+						fieldID = Std.parseInt(value1);
 						if (Math.isNaN(fieldID)) fieldID = 0;
 				}
 				
-				var skin = new NoteSkin(event.value1, SONG.keys, fieldID);
+				var skin = new NoteSkin(value1, SONG.keys, fieldID);
 				
 				// load the skin so game no lag when change le skin
 				Paths.getAtlasFrames(skin.noteTexture);
@@ -1522,18 +1526,18 @@ class PlayState extends MusicBeatState
 				skin = FlxDestroyUtil.destroy(skin);
 			case 'Change Character':
 				var charType:Int = 0;
-				switch (event.value1.toLowerCase())
+				switch (value1.toLowerCase())
 				{
 					case 'gf' | 'girlfriend' | '1':
 						charType = 2;
 					case 'dad' | 'opponent' | '0':
 						charType = 1;
 					default:
-						charType = Std.parseInt(event.value1);
+						charType = Std.parseInt(value1);
 						if (Math.isNaN(charType)) charType = 0;
 				}
 				
-				addCharacterToList(event.value2, charType);
+				addCharacterToList(value2, charType);
 			default:
 				callEventScript(event.event, 'onPush', [event]);
 		}
@@ -1551,7 +1555,7 @@ class PlayState extends MusicBeatState
 	
 	function eventNoteEarlyTrigger(event:EventNote):Float
 	{
-		var returnValue:Dynamic = scripts.call('eventEarlyTrigger', [event.event, event.value1, event.value2]);
+		var returnValue:Dynamic = scripts.call('eventEarlyTrigger', [event.event, event.values[0], event.values[1]]);
 		if (returnValue != ScriptConstants.CONTINUE_FUNC) return returnValue;
 		
 		returnValue = callEventScript(event.event, 'offsetStrumTime', [event]);
@@ -2041,7 +2045,7 @@ class PlayState extends MusicBeatState
 		CoolUtil.cancelMusicFadeTween();
 		
 		ChartEditorState.song = SONG;
-		FlxG.switchState(FlxG.keys.pressed.SHIFT ? ChartEditorState.new : OLDChartEditorState.new);
+		FlxG.switchState(ChartEditorState.new);
 		chartingMode = true;
 		
 		if (automatedDiscord) DiscordClient.changePresence('Chart Editor');
@@ -2111,10 +2115,7 @@ class PlayState extends MusicBeatState
 			
 			if (Conductor.songPosition < leStrumTime) break;
 			
-			final value1:String = eventNotes[0].value1 ?? '';
-			final value2:String = eventNotes[0].value2 ?? '';
-			
-			triggerEventNote(eventNotes[0].event, value1, value2);
+			triggerEventNote(eventNotes[0].event, eventNotes[0].values);
 			eventNotes.shift();
 		}
 	}
@@ -2135,8 +2136,11 @@ class PlayState extends MusicBeatState
 		callHUDFunc(hud -> hud.onCharacterChange());
 	}
 	
-	public function triggerEventNote(eventName:String, value1:String, value2:String):Void
+	public function triggerEventNote(eventName:String, values:Array<String>):Void
 	{
+        // temp
+        final value1 = values[0] ?? '';
+        final value2 = values[1] ?? '';
 		switch (eventName)
 		{
 			case 'Hey!':

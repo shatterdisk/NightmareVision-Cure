@@ -527,6 +527,7 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		lastSong = currentSongName;
 		
 		updateGrid();
+        updateVolume();
 	}
 	
 	public static function getDefaultSong():Song
@@ -1204,7 +1205,8 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			&& FlxG.mouse.y < gridBG.y + (GRID_SIZE * getSectionBeats() * 4) * zoomList[curZoom])
 		{
 			dummyArrow.visible = true;
-			dummyArrow.x = Math.floor(FlxG.mouse.x / GRID_SIZE) * GRID_SIZE;
+			// ...
+			dummyArrow.x = (Math.floor(FlxG.mouse.x / GRID_SIZE) * GRID_SIZE) + 1;
 			if (FlxG.keys.pressed.SHIFT) dummyArrow.y = FlxG.mouse.y;
 			else
 			{
@@ -1293,54 +1295,70 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		lastConductorPos = Conductor.songPosition;
 	}
 	
+	var lastClickX:Float = 0;
+	var lastClickY:Float = 0;
+	
+	// i swear to god.
+	// to-do: mouse drag
 	public function mouseInput(elapsed:Float):Void
 	{
-		if (!selectionBox.alive && FlxG.mouse.justPressed)
+		if (FlxG.mouse.justPressed)
+		{
+			lastClickX = FlxG.mouse.x;
+			lastClickY = FlxG.mouse.y;
+		}
+		
+		if (FlxG.mouse.pressed && !selectionBox.alive && (Math.abs(FlxG.mouse.x - lastClickX) >= 25 || Math.abs(FlxG.mouse.y - lastClickY) >= 25))
+		{
+			selectionBox.revive();
+			selectionBox.setPosition(FlxG.mouse.x, FlxG.mouse.y);
+		}
+		
+		if (selectionBox.alive)
+		{
+			selectionBox.setSize(FlxG.mouse.x - selectionBox.x, FlxG.mouse.y - selectionBox.y);
+			if (FlxG.mouse.justReleased) deselect();
+		}
+		else
+		{
+			if (FlxG.mouse.justReleased)
+			{
+				if (FlxG.mouse.overlaps(curRenderedNotes))
+				{
+					for (note in curRenderedNotes)
+					{
+						if (!FlxG.mouse.overlaps(note)) continue;
+						
+						if (FlxG.keys.pressed.ALT) note.chartData[3] = noteTypeIntMap.get(currentType);
+						
+						selectNote(note);
+						break;
+					}
+				}
+				else
+				{
+					if (FlxG.mouse.x > gridBG.x
+						&& FlxG.mouse.x < gridBG.x + gridBG.width
+						&& FlxG.mouse.y > gridBG.y
+						&& FlxG.mouse.y < gridBG.y + (GRID_SIZE * getSectionBeats() * 4) * zoomList[curZoom])
+					{
+						FlxG.log.add('added note');
+						addNote();
+					}
+				}
+			}
+		}
+		
+		if (FlxG.mouse.pressedRight)
 		{
 			if (FlxG.mouse.overlaps(curRenderedNotes))
 			{
 				for (note in curRenderedNotes)
 				{
 					if (!FlxG.mouse.overlaps(note)) continue;
-					
-					if (FlxG.keys.pressed.CONTROL)
-					{
-						selectNote(note);
-					}
-					else if (FlxG.keys.pressed.ALT)
-					{
-						note.chartData[3] = noteTypeIntMap.get(currentType);
-						selectNote(note);
-					}
-					else
-					{
-						deleteNote(note);
-						break;
-					}
+					deleteNote(note);
 				}
 			}
-			else
-			{
-				if (FlxG.mouse.x > gridBG.x
-					&& FlxG.mouse.x < gridBG.x + gridBG.width
-					&& FlxG.mouse.y > gridBG.y
-					&& FlxG.mouse.y < gridBG.y + (GRID_SIZE * getSectionBeats() * 4) * zoomList[curZoom])
-				{
-					FlxG.log.add('added note');
-					addNote();
-				}
-			}
-		}
-		
-		if (!selectionBox.alive && FlxG.mouse.justPressedRight)
-		{
-			selectionBox.revive();
-			selectionBox.setPosition(FlxG.mouse.x, FlxG.mouse.y);
-		}
-		if (selectionBox.alive)
-		{
-			if (!FlxG.mouse.pressedRight) deselect();
-			else selectionBox.setSize(FlxG.mouse.x - selectionBox.x, FlxG.mouse.y - selectionBox.y);
 		}
 		
 		if (FlxG.mouse.wheel != 0)
@@ -2148,7 +2166,6 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 		if (notes.length == 1)
 		{
 			currentType = (noteTypeMap.get(notes[0][3]) ?? 0);
-			
 			ui.songDialog.noteTypeDropdown.selectedIndex = currentType;
 		}
 		
@@ -2492,8 +2509,10 @@ class ChartEditorState extends haxe.ui.backend.flixel.UIState
 			var event = eventStuff[ui.songDialog.eventDropdown.selectedIndex][0];
 			var text1 = ui.songDialog.value1Field.value;
 			var text2 = ui.songDialog.value2Field.value;
+			var text3 = ui.songDialog.value3Field.value;
+			var text4 = ui.songDialog.value4Field.value;
 			
-			newNote = [noteStrum, [[event, text1, text2]]];
+			newNote = [noteStrum, [[event, text1, text2, text3, text4]]];
 			song.events.push(newNote);
 			
 			if (!FlxG.keys.pressed.SHIFT || curSelectedNotes.length == 0) curEventSelected = 0;

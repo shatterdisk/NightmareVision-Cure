@@ -1,5 +1,7 @@
 package funkin.states.editors.ui;
 
+import funkin.data.Chart;
+import funkin.states.substates.Prompt;
 import haxe.ui.containers.dialogs.Dialog;
 
 import funkin.data.CharacterData;
@@ -46,6 +48,40 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 		
 		songDialog.songNameField.value = song.song;
 		songDialog.songNameField.onChange = function(event) song.song = songDialog.songNameField.value;
+		
+		songDialog.saveSong.onClick = function(event) charter.saveLevel();
+		songDialog.saveEvents.onClick = function(event) charter.saveEvents();
+		songDialog.reloadAudio.onClick = function(event) {
+			charter.currentSongName = Paths.sanitize(song.song);
+			charter.loadSong();
+		}
+		
+		songDialog.reloadJson.onClick = function(event) {
+			charter.openSubState(new Prompt('This action will clear current progress.\n\nProceed?', 0, function() {
+				charter.loadJson(song.song.toLowerCase());
+			}, null, false));
+		};
+		songDialog.loadEvents.onClick = function(event) {
+            var songName:String = Paths.sanitize(song.song);
+			var file:String = Paths.json(songName + '/charts/events');
+			
+			if (FunkinAssets.exists(file, TEXT))
+			{
+				charter.clearEvents();
+				
+				final _events = Chart.fromPath(file);
+				song.events = _events.events;
+				charter.changeSection(ChartEditorState.curSec);
+			}
+			else
+			{
+				Logger.log('events at ($file) could not be found', WARN, true);
+			}
+        };
+		
+		// wip
+		songDialog.autosaves.onClick = function(event) {
+		};
 		
 		songDialog.initialBpmStepper.value = song.bpm;
 		songDialog.initialBpmStepper.onChange = function(event) {
@@ -128,18 +164,18 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 		
 		songDialog.playerWaveCheckbox.value = FlxG.save.data.chart_waveformVoice;
 		songDialog.playerWaveCheckbox.onChange = function(event) {
-			FlxG.save.data.chart_waveformVoices = event.value.toBool();
-			charter.updateWaveform(true);
+			// FlxG.save.data.chart_waveformVoices = event.value.toBool();
+			// charter.updateWaveform(true);
 		}
 		songDialog.opponentWaveCheckbox.value = FlxG.save.data.chart_waveformOpponentVoice;
 		songDialog.opponentWaveCheckbox.onChange = function(event) {
-			FlxG.save.data.chart_waveformOpponentVoices = event.value.toBool();
-			charter.updateWaveform(true);
+			// FlxG.save.data.chart_waveformOpponentVoices = event.value.toBool();
+			// charter.updateWaveform(true);
 		}
 		songDialog.instrumentalWaveCheckbox.value = FlxG.save.data.chart_waveformInst;
 		songDialog.instrumentalWaveCheckbox.onChange = function(event) {
-			FlxG.save.data.chart_waveformInst = event.value.toBool();
-			charter.updateWaveform(true);
+			// FlxG.save.data.chart_waveformInst = event.value.toBool();
+			// charter.updateWaveform(true);
 		}
 		
 		songDialog.playerVolumeStepper.onChange = function(event) charter.updateVolume();
@@ -150,6 +186,8 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 		songDialog.playerMuteCheckbox.onChange = function(event) charter.updateVolume();
 		songDialog.opponentMuteCheckbox.onChange = function(event) charter.updateVolume();
 		songDialog.instrumentalMuteCheckbox.onChange = function(event) charter.updateVolume();
+		
+		songDialog.metronomeMuteCheckbox.value = true;
 		songDialog.metronomeMuteCheckbox.onChange = function(event) charter.updateVolume();
 		
 		songDialog.playerHitsoundCheckbox.onChange = function(event) charter.bfHitsound = event.value;
@@ -339,6 +377,22 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 			selectedEvents[0][1][charter.curEventSelected][2] = songDialog.value2Field.value;
 			charter.updateGrid();
 		}
+		songDialog.value3Field.onChange = function(event) {
+			final selectedEvents = charter.getSelectedEvents();
+			
+			if (selectedEvents.length != 1 || selectedEvents[0][1][charter.curEventSelected] == null) return;
+			
+			selectedEvents[0][1][charter.curEventSelected][3] = songDialog.value3Field.value;
+			charter.updateGrid();
+		}
+		songDialog.value4Field.onChange = function(event) {
+			final selectedEvents = charter.getSelectedEvents();
+			
+			if (selectedEvents.length != 1 || selectedEvents[0][1][charter.curEventSelected] == null) return;
+			
+			selectedEvents[0][1][charter.curEventSelected][4] = songDialog.value4Field.value;
+			charter.updateGrid();
+		}
 	}
 	
 	public function updateEventUI():Void
@@ -384,7 +438,7 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 		songDialog.eventSelected.text = newText;
 		
 		songDialog.removeEventButton.disabled = songDialog.pushEventButton.disabled = (!singleSelected);
-		songDialog.value1Field.disabled = songDialog.value2Field.disabled = songDialog.selectedEventStepper.disabled = (!singleSelected);
+		songDialog.value1Field.disabled = songDialog.value2Field.disabled = songDialog.value3Field.disabled = songDialog.value4Field.disabled = songDialog.selectedEventStepper.disabled = (!singleSelected);
 		
 		if (selectedEvents.length < 2)
 		{
@@ -405,6 +459,8 @@ class ChartEditorUI extends flixel.group.FlxSpriteContainer
 	{
 		songDialog.value1Field.value = event[1];
 		songDialog.value2Field.value = event[2];
+		songDialog.value3Field.value = event[3];
+		songDialog.value4Field.value = event[4];
 	}
 	
 	function refreshCharacterDropdowns():Void
